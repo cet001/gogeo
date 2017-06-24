@@ -31,12 +31,12 @@ func Encode(lat, lng float32, length int) string {
 }
 
 // Encodes a (lat,lng) geo point as a N-bit integer.
-func EncodeInt(lat, lng float32, bits int) int {
+func EncodeInt(lat, lng float32, bits int) uint {
 	// Adapted from https://www.factual.com/blog/how-geohashes-work
 	var minLat, maxLat float32 = -90.0, 90.0
 	var minLng, maxLng float32 = -180.0, 180.0
 
-	result := 0
+	var result uint = 0
 
 	for i := 0; i < bits; i++ {
 		if i%2 == 0 { // even bit: bisect longitude
