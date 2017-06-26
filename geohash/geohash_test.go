@@ -24,10 +24,19 @@ var locations = []TestLocation{
 func TestEncode(t *testing.T) {
 	for _, location := range locations {
 		for i := 1; i <= 9; i++ {
-			h := Encode(location.Lat, location.Lng, i)
+			h, err := Encode(location.Lat, location.Lng, i)
+			assert.Nil(t, err)
 			assert.Equal(t, location.Geohash[:i], h, fmt.Sprintf("%v [length=%v]", location.Name, i))
 		}
 	}
+}
+
+func TestEncode_badLength(t *testing.T) {
+	_, err := Encode(0.0, 0.0, 0) // geohash length too small
+	assert.NotNil(t, err)
+
+	_, err = Encode(0.0, 0.0, 13) // geohash length too big
+	assert.NotNil(t, err)
 }
 
 var encodedGeohash string
@@ -38,7 +47,7 @@ func Benchmark_Encode(b *testing.B) {
 
 	f := func() {
 		location := locations[i]
-		encodedGeohash = Encode(location.Lat, location.Lng, 7)
+		encodedGeohash, _ = Encode(location.Lat, location.Lng, 7)
 		i++
 		if i == locationCount {
 			i = 0

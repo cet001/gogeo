@@ -26,11 +26,11 @@ func ParseLatLng(latLng string) (float32, float32, error) {
 	}
 
 	if lat < -90.0 || lat > 90.0 {
-		return lat, lng, fmt.Errorf("Latitude not in [-90, 90] range: %v", lat)
+		return lat, lng, fmt.Errorf("%v is not a valid latitude (valid range is[-90, 90])", lat)
 	}
 
 	if lng < -180.0 || lng > 180.0 {
-		return lat, lng, fmt.Errorf("Longitude not in [-180, 180] range: %v", lng)
+		return lat, lng, fmt.Errorf("%v is not a valid longitude (valid range is[-180, 180])", lng)
 	}
 
 	return lat, lng, nil

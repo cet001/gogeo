@@ -1,13 +1,19 @@
 package geohash
 
 import (
+	"fmt"
 	"unsafe"
 )
 
 const base32 string = "0123456789bcdefghjkmnpqrstuvwxyz"
 
-// Encodes a (lat,lng) geo point as a base-32 geohash string of the specified length.
-func Encode(lat, lng float32, length int) string {
+// Encodes a (lat,lng) geo point as a base-32 geohash string of the specified length
+// (not to exceed 12 characters).
+func Encode(lat, lng float32, length int) (string, error) {
+	if length < 1 || length > 12 {
+		return "", fmt.Errorf("Requested geohash length out of range: %v. Valid range is [1..12]", length)
+	}
+
 	hashBits := length * 5
 	h := EncodeInt(lat, lng, hashBits)
 
@@ -27,7 +33,7 @@ func Encode(lat, lng float32, length int) string {
 	}
 
 	// Performance optimization: eliminate []byte copy when converting to string
-	return *(*string)(unsafe.Pointer(&b))
+	return *(*string)(unsafe.Pointer(&b)), nil
 }
 
 // Encodes a (lat,lng) geo point as a N-bit integer.
