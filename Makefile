@@ -8,7 +8,7 @@ clean :
 
 test : clean
 	@echo ">>> Running unit tests <<<"
-	@go test ./geohash
+	@go test ./ ./geohash
 
 test-coverage : clean
 	@echo ">>> Running unit tests and calculating code coverage <<<"
