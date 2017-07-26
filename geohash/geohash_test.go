@@ -39,6 +39,17 @@ func TestEncode_badLength(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+// Valid bits range is 0 <= bits <= 64
+func TestEncodeInt_badBits(t *testing.T) {
+	assert.Panics(t, func() {
+		EncodeInt(0.0, 0.0, -1)
+	})
+
+	assert.Panics(t, func() {
+		EncodeInt(0.0, 0.0, 65)
+	})
+}
+
 var encodedGeohash string
 
 func Benchmark_Encode(b *testing.B) {
