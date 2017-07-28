@@ -21,21 +21,21 @@ var locations = []TestLocation{
 	{"JFK Airport", 40.641026, -73.777903, "dr5x1nkx4"},
 }
 
-func TestEncode(t *testing.T) {
+func TestEncodeBase32(t *testing.T) {
 	for _, location := range locations {
 		for i := 1; i <= 9; i++ {
-			h, err := Encode(location.Lat, location.Lng, i)
+			h, err := EncodeBase32(location.Lat, location.Lng, i)
 			assert.Nil(t, err)
 			assert.Equal(t, location.Geohash[:i], h, fmt.Sprintf("%v [length=%v]", location.Name, i))
 		}
 	}
 }
 
-func TestEncode_badLength(t *testing.T) {
-	_, err := Encode(0.0, 0.0, 0) // geohash length too small
+func TestEncodeBase32_badLength(t *testing.T) {
+	_, err := EncodeBase32(0.0, 0.0, 0) // geohash length too small
 	assert.NotNil(t, err)
 
-	_, err = Encode(0.0, 0.0, 13) // geohash length too big
+	_, err = EncodeBase32(0.0, 0.0, 13) // geohash length too big
 	assert.NotNil(t, err)
 }
 
@@ -50,15 +50,35 @@ func TestEncodeInt_badBits(t *testing.T) {
 	})
 }
 
+func TestNeighborhood(t *testing.T) {
+	expectedNeighborhood := map[uint]bool{
+		0x3: true, // me ('0011')
+		0x2: true, // North neighbor
+		0x6: true, // South neighbor
+		0x9: true, // East neighbor
+		0x1: true, // West neighbor
+		0x8: true, // NE neighbor
+		0xC: true, // SE neighbor
+		0x0: true, // NW neighbor
+		0x4: true, // SW neighbor
+	}
+
+	neighborhood := Neighborhood(0x3, 4)
+	assert.Equal(t, 9, len(neighborhood))
+	for _, hash := range neighborhood {
+		assert.True(t, expectedNeighborhood[hash])
+	}
+}
+
 var encodedGeohash string
 
-func Benchmark_Encode(b *testing.B) {
+func Benchmark_EncodeBase32(b *testing.B) {
 	locationCount := len(locations)
 	i := 0
 
 	f := func() {
 		location := locations[i]
-		encodedGeohash, _ = Encode(location.Lat, location.Lng, 7)
+		encodedGeohash, _ = EncodeBase32(location.Lat, location.Lng, 7)
 		i++
 		if i == locationCount {
 			i = 0
