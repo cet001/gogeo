@@ -54,27 +54,6 @@ func EncodeBase32(lat, lng float32, length int) string {
 	return toBase32(EncodeInt(lat, lng, hashBits))
 }
 
-// Returns a slice containing the provided geohash along with its 8 surrounding
-// geohash tiles.
-func Neighborhood(geohash uint, bits uint) []uint {
-	// round bits up to nearest even integer
-	if bits&0x1 == 1 {
-		bits += 1
-	}
-
-	return []uint{
-		geohash,                                   // me
-		moveY(geohash, bits, 1),                   // north neighbor
-		moveY(geohash, bits, -1),                  // south neighbor
-		moveX(geohash, bits, 1),                   // east neighbor
-		moveX(geohash, bits, -1),                  // west neighbor
-		moveX(moveY(geohash, bits, 1), bits, 1),   // northeast neighbor
-		moveX(moveY(geohash, bits, -1), bits, 1),  // southeast neighbor
-		moveX(moveY(geohash, bits, 1), bits, -1),  // northwest neighbor
-		moveX(moveY(geohash, bits, -1), bits, -1), // southwest neighbor
-	}
-}
-
 // Convert the N-bit geohash value into a base32 string.
 func toBase32(h uint) string {
 	// Pre-calculate how many base-32 characters we'll need
@@ -96,9 +75,25 @@ func toBase32(h uint) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
+// Returns a slice containing the provided geohash along with its 8 surrounding
+// geohash tiles.
+func Neighborhood(geohash uint) []uint {
+	return []uint{
+		geohash,                       // me
+		moveY(geohash, 1),             // north neighbor
+		moveY(geohash, -1),            // south neighbor
+		moveX(geohash, 1),             // east neighbor
+		moveX(geohash, -1),            // west neighbor
+		moveX(moveY(geohash, 1), 1),   // northeast neighbor
+		moveX(moveY(geohash, -1), 1),  // southeast neighbor
+		moveX(moveY(geohash, 1), -1),  // northwest neighbor
+		moveX(moveY(geohash, -1), -1), // southwest neighbor
+	}
+}
+
 // Neighborhood() helper that calculates the east-west adjacent tile based on
 // the 'dir' arg (west = -1, east = 1).
-func moveX(geohash, bits uint, dir int) uint {
+func moveX(geohash uint, dir int) uint {
 
 	if dir == 0 {
 		return geohash
@@ -106,7 +101,7 @@ func moveX(geohash, bits uint, dir int) uint {
 
 	var x uint = geohash & 0xAAAAAAAAAAAAAAAA
 	var y uint = geohash & 0x5555555555555555
-	var zz uint = 0x5555555555555555 >> (64 - bits)
+	var zz uint = 0x5555555555555555
 
 	if dir > 0 {
 		x += (zz + 1)
@@ -115,20 +110,20 @@ func moveX(geohash, bits uint, dir int) uint {
 		x -= (zz + 1)
 	}
 
-	x &= (0xAAAAAAAAAAAAAAAA >> (64 - bits))
+	x &= 0xAAAAAAAAAAAAAAAA
 	return x | y
 }
 
 // Neighborhood() helper that calculates the north-south adjacent tile based on
 // the 'dir' arg (north = 1, south = -1).
-func moveY(geohash, bits uint, dir int) uint {
+func moveY(geohash uint, dir int) uint {
 	if dir == 0 {
 		return geohash
 	}
 
 	var x uint = geohash & 0xAAAAAAAAAAAAAAAA
 	var y uint = geohash & 0x5555555555555555
-	var zz uint = 0xAAAAAAAAAAAAAAAA >> (64 - bits)
+	var zz uint = 0xAAAAAAAAAAAAAAAA
 
 	if dir > 0 {
 		y += (zz + 1)
@@ -137,6 +132,6 @@ func moveY(geohash, bits uint, dir int) uint {
 		y -= (zz + 1)
 	}
 
-	y &= (0x5555555555555555 >> (64 - bits))
+	y &= 0x5555555555555555
 	return x | y
 }
