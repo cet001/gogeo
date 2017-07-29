@@ -8,11 +8,11 @@ clean :
 
 test : clean
 	@echo ">>> Running unit tests <<<"
-	@go test ./ ./geohash
+	@go test ./ ./geodist ./geohash
 
 test-coverage : clean
 	@echo ">>> Running unit tests and calculating code coverage <<<"
-	@go test ./ ./geohash -cover
+	@go test ./ ./geodist ./geohash -cover
 
 install : test
 	@echo ">>> Building and installing gogeo <<<"

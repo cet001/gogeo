@@ -82,7 +82,9 @@ func TestNeighborhood(t *testing.T) {
 		0x4: true, // SW neighbor
 	}
 
-	neighborhood := Neighborhood(0x3)
+	// Note: The geo point (0,-90) corresonds to the geohash 0x3
+	neighborhood := Neighborhood(-10.0, -90.0, 4)
+
 	assert.Equal(t, 9, len(neighborhood))
 	for _, hash := range neighborhood {
 		assert.True(t, expectedNeighborhood[hash])
@@ -97,16 +99,11 @@ func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
 		"7zzzzz": true, "kpbpbp": true, "kpbpbr": true,
 	}
 
-	bits := 6 * 5 // 6-character base32 geohash; each base32 characters represents 5 bits
-	h := Encode(0.0, 0.0, bits)
-	neighborhood := Neighborhood(h)
-
+	neighborhood := NeighborhoodBase32(0.0, 0.0, 6)
 	assert.Equal(t, 9, len(neighborhood))
-
 	for _, neighbor := range neighborhood {
-		assert.True(t, expectedNeighborhood[toBase32(neighbor)])
+		assert.True(t, expectedNeighborhood[neighbor])
 	}
-
 }
 
 func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
@@ -117,14 +114,10 @@ func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
 		"7zzzz": true, "kpbpb": true, "kpbpc": true,
 	}
 
-	bits := 5 * 5 // 5-character base32 geohash; each base32 characters represents 5 bits
-	h := Encode(0.0, 0.0, bits)
-	neighborhood := Neighborhood(h)
-
+	neighborhood := NeighborhoodBase32(0.0, 0.0, 5)
 	assert.Equal(t, 9, len(neighborhood))
-
 	for _, neighbor := range neighborhood {
-		assert.True(t, expectedNeighborhood[toBase32(neighbor)])
+		assert.True(t, expectedNeighborhood[neighbor])
 	}
 
 }
@@ -137,14 +130,10 @@ func TestNeighborhood_9charGeoHash(t *testing.T) {
 		"9v6kpsez3": true, "9v6kpsez6": true, "9v6kpsez7": true,
 	}
 
-	bits := 9 * 5 // 9-character base32 geohash; each base32 characters represents 5 bits
-	h := Encode(30.260415, -97.751107, bits)
-	neighborhood := Neighborhood(h)
-
+	neighborhood := NeighborhoodBase32(30.260415, -97.751107, 9)
 	assert.Equal(t, 9, len(neighborhood))
-
 	for _, neighbor := range neighborhood {
-		assert.True(t, expectedNeighborhood[toBase32(neighbor)])
+		assert.True(t, expectedNeighborhood[neighbor])
 	}
 
 }
