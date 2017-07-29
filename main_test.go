@@ -1,16 +1,18 @@
 package gogeo
 
 import (
-	// "fmt"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestParseLatLng(t *testing.T) {
-	lat, lng, err := ParseLatLng("50.456, -80.2468")
-	assert.Nil(t, err)
-	assert.Equal(t, lat, float32(50.456))
-	assert.Equal(t, lng, float32(-80.2468))
+func ExampleParseLatLng() {
+	lat, lng, _ := ParseLatLng("50.456, -80.2468")
+	fmt.Println(lat)
+	fmt.Println(lng)
+	// Output:
+	// 50.456
+	// -80.2468
 }
 
 func TestParseLatLng_badInputs(t *testing.T) {

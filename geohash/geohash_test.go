@@ -21,6 +21,16 @@ var locations = []TestLocation{
 	{"JFK Airport", 40.641026, -73.777903, "dr5x1nkx4"},
 }
 
+func ExampleEncodeBase32() {
+	fmt.Println(EncodeBase32(37.751223, -122.438297, 6))
+	fmt.Println(EncodeBase32(37.751223, -122.438297, 5))
+	fmt.Println(EncodeBase32(37.751223, -122.438297, 4))
+	// Output:
+	// 9q8yvb
+	// 9q8yv
+	// 9q8y
+}
+
 func TestEncodeBase32(t *testing.T) {
 	for _, location := range locations {
 		for i := 1; i <= 9; i++ {
@@ -38,6 +48,14 @@ func TestEncodeBase32_badLength(t *testing.T) {
 	assert.Panics(t, func() {
 		EncodeBase32(0.0, 0.0, 13) // geohash length too big
 	})
+}
+
+func ExampleEncodeInt() {
+	fmt.Println(EncodeInt(37.751223, -122.438297, 8))
+	fmt.Println(EncodeInt(37.751223, -122.438297, 32))
+	// Output:
+	// 77
+	// 1301409192
 }
 
 // Valid bits range is 0 <= bits <= 64

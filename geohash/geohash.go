@@ -94,7 +94,6 @@ func Neighborhood(geohash uint) []uint {
 // Neighborhood() helper that calculates the east-west adjacent tile based on
 // the 'dir' arg (west = -1, east = 1).
 func moveX(geohash uint, dir int) uint {
-
 	if dir == 0 {
 		return geohash
 	}
