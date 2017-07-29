@@ -15,10 +15,29 @@ type TestLocation struct {
 
 // List of known geo points
 var locations = []TestLocation{
-	{"Twitter HQ", 37.777000, -122.416583, "9q8yym4fz"},
-	{"Uber HQ", 37.775253, -122.417527, "9q8yykf2c"},
+	{"Twitter HQ", 37.777000, -122.416583, "9q8yym4fy"},
+	{"Uber HQ", 37.775253, -122.417527, "9q8yykf2b"},
 	{"Denver Airport", 39.855242, -104.672130, "9xjddpkjd"},
 	{"JFK Airport", 40.641026, -73.777903, "dr5x1nkx4"},
+}
+
+func ExampleEncode() {
+	fmt.Println(Encode(37.751223, -122.438297, 8))
+	fmt.Println(Encode(37.751223, -122.438297, 32))
+	// Output:
+	// 77
+	// 1301409192
+}
+
+// Valid bits range is 0 <= bits <= 64
+func TestEncode_badBits(t *testing.T) {
+	assert.Panics(t, func() {
+		Encode(0.0, 0.0, -1)
+	})
+
+	assert.Panics(t, func() {
+		Encode(0.0, 0.0, 65)
+	})
 }
 
 func ExampleEncodeBase32() {
@@ -50,25 +69,6 @@ func TestEncodeBase32_badLength(t *testing.T) {
 	})
 }
 
-func ExampleEncodeInt() {
-	fmt.Println(EncodeInt(37.751223, -122.438297, 8))
-	fmt.Println(EncodeInt(37.751223, -122.438297, 32))
-	// Output:
-	// 77
-	// 1301409192
-}
-
-// Valid bits range is 0 <= bits <= 64
-func TestEncodeInt_badBits(t *testing.T) {
-	assert.Panics(t, func() {
-		EncodeInt(0.0, 0.0, -1)
-	})
-
-	assert.Panics(t, func() {
-		EncodeInt(0.0, 0.0, 65)
-	})
-}
-
 func TestNeighborhood(t *testing.T) {
 	expectedNeighborhood := map[uint]bool{
 		0x3: true, // me ('0011' 4-bit binary)
@@ -90,6 +90,7 @@ func TestNeighborhood(t *testing.T) {
 }
 
 func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
+	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"ebpbpc": true, "s00001": true, "s00003": true,
 		"ebpbpb": true, "s00000": true, "s00002": true,
@@ -97,7 +98,7 @@ func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
 	}
 
 	bits := 6 * 5 // 6-character base32 geohash; each base32 characters represents 5 bits
-	h := EncodeInt(0.0, 0.0, bits)
+	h := Encode(0.0, 0.0, bits)
 	neighborhood := Neighborhood(h)
 
 	assert.Equal(t, 9, len(neighborhood))
@@ -109,6 +110,7 @@ func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
 }
 
 func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
+	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"ebpbr": true, "s0002": true, "s0003": true,
 		"ebpbp": true, "s0000": true, "s0001": true,
@@ -116,7 +118,7 @@ func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
 	}
 
 	bits := 5 * 5 // 5-character base32 geohash; each base32 characters represents 5 bits
-	h := EncodeInt(0.0, 0.0, bits)
+	h := Encode(0.0, 0.0, bits)
 	neighborhood := Neighborhood(h)
 
 	assert.Equal(t, 9, len(neighborhood))
@@ -128,6 +130,7 @@ func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
 }
 
 func TestNeighborhood_9charGeoHash(t *testing.T) {
+	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"9v6kpsezc": true, "9v6kpsezf": true, "9v6kpsezg": true,
 		"9v6kpsez9": true, "9v6kpsezd": true, "9v6kpseze": true,
@@ -135,7 +138,7 @@ func TestNeighborhood_9charGeoHash(t *testing.T) {
 	}
 
 	bits := 9 * 5 // 9-character base32 geohash; each base32 characters represents 5 bits
-	h := EncodeInt(30.260415, -97.751107, bits)
+	h := Encode(30.260415, -97.751107, bits)
 	neighborhood := Neighborhood(h)
 
 	assert.Equal(t, 9, len(neighborhood))
@@ -146,14 +149,14 @@ func TestNeighborhood_9charGeoHash(t *testing.T) {
 
 }
 
-func Benchmark_EncodeInt(b *testing.B) {
+func Benchmark_Encode(b *testing.B) {
 	locationCount := len(locations)
 	i := 0
 	var encodedGeohash uint
 
 	f := func() {
 		location := locations[i]
-		encodedGeohash = EncodeInt(location.Lat, location.Lng, 36)
+		encodedGeohash = Encode(location.Lat, location.Lng, 36)
 		i++
 		if i == locationCount {
 			i = 0
