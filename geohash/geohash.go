@@ -5,37 +5,7 @@ import (
 	"unsafe"
 )
 
-// Base-32 symbols
-const base32 string = "0123456789bcdefghjkmnpqrstuvwxyz"
-
-// Encodes a (lat,lng) geo point as a base-32 geohash string of the specified length
-// (not to exceed 12 characters).
-func EncodeBase32(lat, lng float32, length int) (string, error) {
-	if length < 1 || length > 12 {
-		return "", fmt.Errorf("Requested geohash length out of range: %v. Valid range is [1..12]", length)
-	}
-
-	hashBits := length * 5
-	h := EncodeInt(lat, lng, hashBits)
-
-	// Pre-calculate how many base-32 characters we'll need
-	hTmp := h
-	charCount := 0
-	for hTmp > 0 {
-		hTmp >>= 5
-		charCount++
-	}
-
-	// generate the geohash string
-	b := make([]byte, charCount)
-	for i := (charCount - 1); i >= 0; i-- {
-		b[i] = base32[h&0x1F]
-		h >>= 5
-	}
-
-	// Performance optimization: eliminate []byte copy when converting to string
-	return *(*string)(unsafe.Pointer(&b)), nil
-}
+const base32symbols string = "0123456789bcdefghjkmnpqrstuvwxyz"
 
 // Encodes a (lat,lng) geo point as a N-bit integer.
 func EncodeInt(lat, lng float32, bits int) uint {
@@ -50,7 +20,7 @@ func EncodeInt(lat, lng float32, bits int) uint {
 	var result uint = 0
 
 	for i := 0; i < bits; i++ {
-		if i%2 == 0 { // even bit: bisect longitude
+		if (i & 0x1) == 0 { // even bit: bisect longitude
 			midpoint := (minLng + maxLng) / 2
 			if lng < midpoint {
 				result <<= 1      // push a zero bit
@@ -73,9 +43,25 @@ func EncodeInt(lat, lng float32, bits int) uint {
 	return result
 }
 
+// Encodes a (lat,lng) geo point as a base-32 geohash string of the specified
+// length (not to exceed 12 characters).
+func EncodeBase32(lat, lng float32, length int) string {
+	if length < 1 || length > 12 {
+		panic(fmt.Errorf("Requested geohash length out of range: %v. Valid range is [1..12]", length))
+	}
+
+	hashBits := length * 5
+	return toBase32(EncodeInt(lat, lng, hashBits))
+}
+
 // Returns a slice containing the provided geohash along with its 8 surrounding
 // geohash tiles.
 func Neighborhood(geohash uint, bits uint) []uint {
+	// round bits up to nearest even integer
+	if bits&0x1 == 1 {
+		bits += 1
+	}
+
 	return []uint{
 		geohash,                                   // me
 		moveY(geohash, bits, 1),                   // north neighbor
@@ -89,9 +75,31 @@ func Neighborhood(geohash uint, bits uint) []uint {
 	}
 }
 
+// Convert the N-bit geohash value into a base32 string.
+func toBase32(h uint) string {
+	// Pre-calculate how many base-32 characters we'll need
+	hTmp := h
+	charCount := 0
+	for hTmp > 0 {
+		hTmp >>= 5
+		charCount++
+	}
+
+	// generate the geohash string
+	b := make([]byte, charCount)
+	for i := (charCount - 1); i >= 0; i-- {
+		b[i] = base32symbols[h&0x1F]
+		h >>= 5
+	}
+
+	// Performance optimization: eliminate []byte copy when converting to string
+	return *(*string)(unsafe.Pointer(&b))
+}
+
 // Neighborhood() helper that calculates the east-west adjacent tile based on
 // the 'dir' arg (west = -1, east = 1).
 func moveX(geohash, bits uint, dir int) uint {
+
 	if dir == 0 {
 		return geohash
 	}

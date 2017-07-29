@@ -24,19 +24,20 @@ var locations = []TestLocation{
 func TestEncodeBase32(t *testing.T) {
 	for _, location := range locations {
 		for i := 1; i <= 9; i++ {
-			h, err := EncodeBase32(location.Lat, location.Lng, i)
-			assert.Nil(t, err)
+			h := EncodeBase32(location.Lat, location.Lng, i)
 			assert.Equal(t, location.Geohash[:i], h, fmt.Sprintf("%v [length=%v]", location.Name, i))
 		}
 	}
 }
 
 func TestEncodeBase32_badLength(t *testing.T) {
-	_, err := EncodeBase32(0.0, 0.0, 0) // geohash length too small
-	assert.NotNil(t, err)
+	assert.Panics(t, func() {
+		EncodeBase32(0.0, 0.0, 0) // geohash length too small
+	})
 
-	_, err = EncodeBase32(0.0, 0.0, 13) // geohash length too big
-	assert.NotNil(t, err)
+	assert.Panics(t, func() {
+		EncodeBase32(0.0, 0.0, 13) // geohash length too big
+	})
 }
 
 // Valid bits range is 0 <= bits <= 64
@@ -52,7 +53,7 @@ func TestEncodeInt_badBits(t *testing.T) {
 
 func TestNeighborhood(t *testing.T) {
 	expectedNeighborhood := map[uint]bool{
-		0x3: true, // me ('0011')
+		0x3: true, // me ('0011' 4-bit binary)
 		0x2: true, // North neighbor
 		0x6: true, // South neighbor
 		0x9: true, // East neighbor
@@ -70,15 +71,72 @@ func TestNeighborhood(t *testing.T) {
 	}
 }
 
-var encodedGeohash string
+func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
+	expectedNeighborhood := map[string]bool{
+		"ebpbpc": true, "s00001": true, "s00003": true,
+		"ebpbpb": true, "s00000": true, "s00002": true,
+		"7zzzzz": true, "kpbpbp": true, "kpbpbr": true,
+	}
+
+	bits := 6 * 5 // 6-character base32 geohash; each base32 characters represents 5 bits
+	h := EncodeInt(0.0, 0.0, bits)
+	neighborhood := Neighborhood(h, uint(bits))
+
+	assert.Equal(t, 9, len(neighborhood))
+
+	for _, neighbor := range neighborhood {
+		assert.True(t, expectedNeighborhood[toBase32(neighbor)])
+	}
+
+}
+
+func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
+	expectedNeighborhood := map[string]bool{
+		"ebpbr": true, "s0002": true, "s0003": true,
+		"ebpbp": true, "s0000": true, "s0001": true,
+		"7zzzz": true, "kpbpb": true, "kpbpc": true,
+	}
+
+	bits := 5 * 5 // 6-character base32 geohash; each base32 characters represents 5 bits
+	h := EncodeInt(0.0, 0.0, bits)
+	neighborhood := Neighborhood(h, uint(bits))
+
+	assert.Equal(t, 9, len(neighborhood))
+
+	for _, neighbor := range neighborhood {
+		assert.True(t, expectedNeighborhood[toBase32(neighbor)])
+	}
+
+}
+
+func Benchmark_EncodeInt(b *testing.B) {
+	locationCount := len(locations)
+	i := 0
+	var encodedGeohash uint
+
+	f := func() {
+		location := locations[i]
+		encodedGeohash = EncodeInt(location.Lat, location.Lng, 36)
+		i++
+		if i == locationCount {
+			i = 0
+		}
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		f()
+	}
+}
 
 func Benchmark_EncodeBase32(b *testing.B) {
 	locationCount := len(locations)
 	i := 0
+	var encodedGeohash string
 
 	f := func() {
 		location := locations[i]
-		encodedGeohash, _ = EncodeBase32(location.Lat, location.Lng, 7)
+		encodedGeohash = EncodeBase32(location.Lat, location.Lng, 7)
 		i++
 		if i == locationCount {
 			i = 0
