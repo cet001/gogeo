@@ -91,7 +91,7 @@ func TestNeighborhood(t *testing.T) {
 	}
 }
 
-func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
+func TestNeighborhoodBase32_atEquator_evenHashLength(t *testing.T) {
 	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"ebpbpc": true, "s00001": true, "s00003": true,
@@ -106,7 +106,7 @@ func TestNeighborhood_atEquator_evenHashLength(t *testing.T) {
 	}
 }
 
-func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
+func TestNeighborhoodBase32_atEquator_oddHashLength(t *testing.T) {
 	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"ebpbr": true, "s0002": true, "s0003": true,
@@ -122,7 +122,7 @@ func TestNeighborhood_atEquator_oddHashLength(t *testing.T) {
 
 }
 
-func TestNeighborhood_9charGeoHash(t *testing.T) {
+func TestNeighborhoodBase32_9charGeoHash(t *testing.T) {
 	// These results generated with http://www.movable-type.co.uk/scripts/geohash.html
 	expectedNeighborhood := map[string]bool{
 		"9v6kpsezc": true, "9v6kpsezf": true, "9v6kpsezg": true,

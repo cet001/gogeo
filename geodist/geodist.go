@@ -11,12 +11,26 @@ type Coord struct {
 	Lng float32
 }
 
+func Haversine(a, b Coord) float64 {
+	aLat, bLat := float64(a.Lat)*mathext.Deg2rad, float64(b.Lat)*mathext.Deg2rad
+	deltaLat := bLat - aLat
+	deltaLng := float64(b.Lng-a.Lng) * mathext.Deg2rad
+
+	calc1 := math.Sin(deltaLat/2)*math.Sin(deltaLat/2) +
+		math.Cos(aLat)*math.Cos(bLat)*
+			math.Sin(deltaLng/2)*math.Sin(deltaLng/2)
+	calc2 := 2 * math.Atan2(math.Sqrt(calc1), math.Sqrt(1-calc1))
+
+	const earthRadiusKm float64 = 6371
+	return earthRadiusKm * calc2
+}
+
 // Returns the **approximate** distance (in kilometers) between coordinates c1 and
 // c2.  This distance function is much faster than, say, the Haversine formula
 // or the spherical law of cosines, as it does not take into account the
 // curvature of the earth.  Instead, ApproxDist() trivially takes the Euclidian
 // distance between the two coordinates -- and as a result of this, its accuracy
-// decreases as the actual distance bertween c1 and c2 increases.
+// decreases as the actual distance between c1 and c2 increases.
 //
 // This function is practical in situations where you need to calculate the
 // distance between two "relatively close" points on a map (e.g. 2 houses
