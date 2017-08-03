@@ -67,3 +67,23 @@ func deltaErr(distKm float64) float64 {
 		return distKm * 0.02
 	}
 }
+
+func Benchmark_ApproxDist(b *testing.B) {
+	segmentCount := len(testSegments)
+	i := 0
+	var dist float64
+
+	f := func() {
+		testSegment := testSegments[i]
+		dist = ApproxDist(testSegment.a, testSegment.b)
+		i++
+		if i == segmentCount {
+			i = 0
+		}
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		f()
+	}
+}
