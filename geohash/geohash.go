@@ -7,9 +7,9 @@ import (
 
 const base32symbols string = "0123456789bcdefghjkmnpqrstuvwxyz"
 
-// Encodes a (lat,lng) geo point as a N-bit integer.
+// Encodes a (lat,lng) geo point as a N-bit geohash.
 func Encode(lat, lng float32, bits int) uint {
-	bits = validateBitsParam(bits)
+	bits = validateGeoHashBitWidth(bits)
 
 	// Adapted from https://www.factual.com/blog/how-geohashes-work
 	var minLat, maxLat float64 = -90.0, 90.0
@@ -53,7 +53,7 @@ func EncodeBase32(lat, lng float32, length int) string {
 // Returns a slice containing the provided geohash along with its 8 surrounding
 // geohash tiles.
 func Neighborhood(lat, lng float32, bits int) []uint {
-	h := Encode(lat, lng, validateBitsParam(bits))
+	h := Encode(lat, lng, validateGeoHashBitWidth(bits))
 
 	// adapted from: https://github.com/yinqiwen/geohash-int/blob/b01291be60015cd399227f2e3305c5a3262f68c1/geohash.c
 	return []uint{
@@ -117,7 +117,7 @@ func moveY(geohash uint, dir int) uint {
 	return x | y
 }
 
-// Convert the N-bit geohash value into a base32 string.
+// Convert the N-bit geohash integer into a base32 string.
 func toBase32(h uint) string {
 	// Pre-calculate how many base-32 characters we'll need
 	hTmp := h
@@ -138,7 +138,7 @@ func toBase32(h uint) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
 
-func validateBitsParam(bits int) int {
+func validateGeoHashBitWidth(bits int) int {
 	if bits < 0 || bits > 64 {
 		panic(fmt.Sprintf("'bits' must be in the range [0, 64]. Actual value was %v", bits))
 	}

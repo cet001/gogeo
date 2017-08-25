@@ -32,18 +32,18 @@ var testSegments = []Segment{
 	Segment{sfo, lax, 543.0},
 }
 
-func ExampleApproxDist() {
+func ExampleEuclidean() {
 	voodooDoughnuts := Coord{Lat: 45.522869, Lng: -122.673132}
 	powellsCityOfBooks := Coord{Lat: 45.523437, Lng: -122.681381}
-	d := ApproxDist(voodooDoughnuts, powellsCityOfBooks)
+	d := Euclidean(voodooDoughnuts, powellsCityOfBooks)
 	fmt.Printf("Voodoo Doughnuts is %.2f km from Powell's City of Books.\n", d)
 	// Output:
 	// Voodoo Doughnuts is 0.64 km from Powell's City of Books.
 }
 
-func TestApproxDist(t *testing.T) {
+func TestEuclidean(t *testing.T) {
 	for _, testSegment := range testSegments {
-		distKm := ApproxDist(testSegment.a, testSegment.b)
+		distKm := Euclidean(testSegment.a, testSegment.b)
 		assert.InDelta(t, testSegment.dist, distKm, deltaErr(testSegment.dist))
 	}
 }
@@ -68,14 +68,14 @@ func deltaErr(distKm float64) float64 {
 	}
 }
 
-func Benchmark_ApproxDist(b *testing.B) {
+func Benchmark_Euclidean(b *testing.B) {
 	segmentCount := len(testSegments)
 	i := 0
 	var dist float64
 
 	f := func() {
 		testSegment := testSegments[i]
-		dist = ApproxDist(testSegment.a, testSegment.b)
+		dist = Euclidean(testSegment.a, testSegment.b)
 		i++
 		if i == segmentCount {
 			i = 0
