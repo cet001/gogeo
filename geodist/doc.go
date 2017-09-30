@@ -1,3 +1,3 @@
-// Package geodist contains functions for determining the geographical distances
+// Package geodist contains functions for computing the geographical distance
 // between 2 locations.
 package geodist

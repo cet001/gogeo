@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// Parses a latitude/longitude point of the form "45.521066,-122.684984" into a
-// pair of float32 values.
+// Parses a formatted latitude/longitude geo point of the form "<lat>,<lng>" into
+// a pair of float32 values.
 func ParseLatLng(latLng string) (float32, float32, error) {
 	latLngSlice := strings.Split(latLng, ",")
 	if len(latLngSlice) != 2 {

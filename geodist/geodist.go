@@ -12,11 +12,11 @@ type Coord struct {
 }
 
 // Calculates the great-circle distance (in kilomerers) between geographical
-// points a and b.
-func Haversine(a, b Coord) float64 {
-	aLat, bLat := float64(a.Lat)*mathext.Deg2rad, float64(b.Lat)*mathext.Deg2rad
+// coordinates c1 and c2.
+func Haversine(c1, c2 Coord) float64 {
+	aLat, bLat := float64(c1.Lat)*mathext.Deg2rad, float64(c2.Lat)*mathext.Deg2rad
 	deltaLat := bLat - aLat
-	deltaLng := float64(b.Lng-a.Lng) * mathext.Deg2rad
+	deltaLng := float64(c2.Lng-c1.Lng) * mathext.Deg2rad
 
 	calc1 := math.Sin(deltaLat/2)*math.Sin(deltaLat/2) +
 		math.Cos(aLat)*math.Cos(bLat)*
