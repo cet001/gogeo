@@ -68,6 +68,7 @@ func deltaErr(distKm float64) float64 {
 	}
 }
 
+var benchmarkEuclideanResult float64 // avoid compiler optimizations
 func Benchmark_Euclidean(b *testing.B) {
 	segmentCount := len(testSegments)
 	i := 0
@@ -86,4 +87,6 @@ func Benchmark_Euclidean(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		f()
 	}
+
+	benchmarkEuclideanResult = dist
 }
