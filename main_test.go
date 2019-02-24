@@ -36,3 +36,30 @@ func TestParseLatLng_badInputs(t *testing.T) {
 		assert.NotNil(t, err)
 	}
 }
+
+func TestParseFloat32(t *testing.T) {
+	testCases := []struct {
+		s     string
+		f     float32
+		isErr bool
+	}{
+		{s: "0", f: 0.0},
+		{s: "1.2345", f: 1.2345},
+		{s: "-1.2345", f: -1.2345},
+		{s: "  1.5", f: 1.5},
+		{s: "ABC", isErr: true},
+		{s: "1x", isErr: true},
+		{s: "", isErr: true},
+	}
+
+	for i, testCase := range testCases {
+		testCaseLabel := fmt.Sprintf("testCases[%v]", i)
+		f, err := parseFloat32(testCase.s)
+		if testCase.isErr {
+			assert.NotNil(t, err, "%v should have returned an error", testCaseLabel)
+		} else {
+			assert.Nil(t, err, testCaseLabel)
+			assert.Equal(t, testCase.f, f, testCaseLabel)
+		}
+	}
+}
