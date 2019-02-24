@@ -138,6 +138,7 @@ func TestNeighborhoodBase32_9charGeoHash(t *testing.T) {
 
 }
 
+var benchmarkEncodeResult uint // prohibit compiler optimizations
 func Benchmark_Encode(b *testing.B) {
 	locationCount := len(locations)
 	i := 0
@@ -156,8 +157,11 @@ func Benchmark_Encode(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		f()
 	}
+
+	benchmarkEncodeResult = encodedGeohash
 }
 
+var benchmarkEncodeBase32Result string // prohibit compiler optimizations
 func Benchmark_EncodeBase32(b *testing.B) {
 	locationCount := len(locations)
 	i := 0
@@ -176,4 +180,6 @@ func Benchmark_EncodeBase32(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		f()
 	}
+
+	benchmarkEncodeBase32Result = encodedGeohash
 }

@@ -4,7 +4,6 @@ clean :
 	@echo ">>> Cleaning and initializing gogeo project <<<"
 	@go clean
 	@gofmt -w .
-	@go get github.com/stretchr/testify
 
 test : clean
 	@echo ">>> Running unit tests <<<"
