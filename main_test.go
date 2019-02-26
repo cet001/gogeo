@@ -6,6 +6,38 @@ import (
 	"testing"
 )
 
+func TestParseLat(t *testing.T) {
+	lat, err := ParseLat("45.75")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(45.75), lat)
+
+	lat, err = ParseLat("-45.75")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(-45.75), lat)
+
+	_, err = ParseLat("-90.1")
+	assert.NotNil(t, err)
+
+	_, err = ParseLat("90.1")
+	assert.NotNil(t, err)
+}
+
+func TestParseLng(t *testing.T) {
+	lat, err := ParseLng("120.12575")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(120.12575), lat)
+
+	lat, err = ParseLng("-120.12575")
+	assert.Nil(t, err)
+	assert.Equal(t, float32(-120.12575), lat)
+
+	_, err = ParseLng("-180.1")
+	assert.NotNil(t, err)
+
+	_, err = ParseLng("180.1")
+	assert.NotNil(t, err)
+}
+
 func ExampleParseLatLng() {
 	lat, lng, _ := ParseLatLng("50.456, -80.2468")
 	fmt.Println(lat)
